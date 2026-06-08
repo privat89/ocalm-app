@@ -1,0 +1,14 @@
+# OCALM — Fichiers à ignorer
+node_modules/
+dist/
+build/
+.dart_tool/
+.packages
+*.freezed.dart
+*.g.dart
+coverage/
+.env.local
+.env.production
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,211 @@
+
+
+services:
+  # PostgreSQL 15
+  postgres:
+    image: postgres:15
+    container_name: ocalm-postgres
+    environment:
+      POSTGRES_DB: ocalm
+      POSTGRES_USER: ocalm_user
+      POSTGRES_PASSWORD: ocalm_secret_2025
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ocalm_user -d ocalm"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: ocalm-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ocalm_redis_2025
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "ocalm_redis_2025", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: ocalm-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ocalm
+      RABBITMQ_DEFAULT_PASS: ocalm_rabbit_2025
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MinIO (stockage photos preuves)
+  minio:
+    image: minio/minio:latest
+    container_name: ocalm-minio
+    environment:
+      MINIO_ROOT_USER: ocalm_minio
+      MINIO_ROOT_PASSWORD: ocalm_minio_2025
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  # Auth Service
+  auth-service:
+    build: ./services/auth-service
+    container_name: ocalm-auth
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./services/auth-service/src:/app/src
+    environment:
+      - PORT=3001
+      - DATABASE_URL=postgresql://ocalm_user:ocalm_secret_2025@postgres:5432/ocalm
+      - REDIS_URL=redis://:ocalm_redis_2025@redis:6379
+      - RABBITMQ_URL=amqp://ocalm:ocalm_rabbit_2025@rabbitmq:5672
+      - JWT_SECRET=ocalm_jwt_secret_change_in_production
+      - OTP_EXPIRY_MINUTES=5
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Wallet Service
+  wallet-service:
+    build: ./services/wallet-service
+    container_name: ocalm-wallet
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./services/wallet-service/src:/app/src
+    environment:
+      - PORT=3002
+      - DATABASE_URL=postgresql://ocalm_user:ocalm_secret_2025@postgres:5432/ocalm
+      - REDIS_URL=redis://:ocalm_redis_2025@redis:6379
+      - RABBITMQ_URL=amqp://ocalm:ocalm_rabbit_2025@rabbitmq:5672
+      - WAVE_API_KEY=wave_sandbox_key
+      - WAVE_API_SECRET=wave_sandbox_secret
+      - WAVE_WEBHOOK_SECRET=wave_webhook_secret
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Escrow Service
+  escrow-service:
+    build: ./services/escrow-service
+    container_name: ocalm-escrow
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./services/escrow-service/src:/app/src
+    environment:
+      - PORT=3003
+      - DATABASE_URL=postgresql://ocalm_user:ocalm_secret_2025@postgres:5432/ocalm
+      - REDIS_URL=redis://:ocalm_redis_2025@redis:6379
+      - RABBITMQ_URL=amqp://ocalm:ocalm_rabbit_2025@rabbitmq:5672
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Delivery Service
+  delivery-service:
+    build: ./services/delivery-service
+    container_name: ocalm-delivery
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./services/delivery-service/src:/app/src
+    environment:
+      - PORT=3004
+      - DATABASE_URL=postgresql://ocalm_user:ocalm_secret_2025@postgres:5432/ocalm
+      - REDIS_URL=redis://:ocalm_redis_2025@redis:6379
+      - RABBITMQ_URL=amqp://ocalm:ocalm_rabbit_2025@rabbitmq:5672
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Dispute Service
+  dispute-service:
+    build: ./services/dispute-service
+    container_name: ocalm-dispute
+    ports:
+      - "3005:3005"
+    volumes:
+      - ./services/dispute-service/src:/app/src
+    environment:
+      - PORT=3005
+      - DATABASE_URL=postgresql://ocalm_user:ocalm_secret_2025@postgres:5432/ocalm
+      - REDIS_URL=redis://:ocalm_redis_2025@redis:6379
+      - RABBITMQ_URL=amqp://ocalm:ocalm_rabbit_2025@rabbitmq:5672
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=ocalm_minio
+      - MINIO_SECRET_KEY=ocalm_minio_2025
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Notification Service
+  notification-service:
+    build: ./services/notification-service
+    container_name: ocalm-notification
+    ports:
+      - "3006:3006"
+    volumes:
+      - ./services/notification-service/src:/app/src
+    environment:
+      - PORT=3006
+      - DATABASE_URL=postgresql://ocalm_user:ocalm_secret_2025@postgres:5432/ocalm
+      - REDIS_URL=redis://:ocalm_redis_2025@redis:6379
+      - RABBITMQ_URL=amqp://ocalm:ocalm_rabbit_2025@rabbitmq:5672
+      - SMS_API_KEY=sms_sandbox_key
+      - FCM_SERVICE_ACCOUNT=./firebase-service-account.json
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # API Gateway (Nginx)
+  gateway:
+    image: nginx:alpine
+    container_name: ocalm-gateway
+    ports:
+      - "3000:80"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - auth-service
+      - wallet-service
+      - escrow-service
+      - delivery-service
+      - dispute-service
+      - notification-service
+
+volumes:
+  postgres_data:
+  minio_data:

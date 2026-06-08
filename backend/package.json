@@ -1,0 +1,22 @@
+{
+  "name": "ocalm-backend",
+  "version": "1.0.0",
+  "description": "OCALM Backend - Tiers de confiance pour transactions sécurisées",
+  "private": true,
+  "scripts": {
+    "start:dev": "docker-compose up -d && npm run start:all",
+    "start:all": "concurrently \"npm run start:auth\" \"npm run start:wallet\" \"npm run start:escrow\" \"npm run start:delivery\" \"npm run start:dispute\" \"npm run start:notification\"",
+    "start:auth": "cd services/auth-service && npm run start:dev",
+    "start:wallet": "cd services/wallet-service && npm run start:dev",
+    "start:escrow": "cd services/escrow-service && npm run start:dev",
+    "start:delivery": "cd services/delivery-service && npm run start:dev",
+    "start:dispute": "cd services/dispute-service && npm run start:dev",
+    "start:notification": "cd services/notification-service && npm run start:dev",
+    "db:migrate": "cd database && npx knex migrate:latest",
+    "db:seed": "cd database && npx knex seed:run",
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
