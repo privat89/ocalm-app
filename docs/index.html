@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCALM - Preview App</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-primary: #1A0F2E;
+  --bg-secondary: #2D1B4E;
+  --accent-orange: #FF6B35;
+  --text-cream: #F5E6D3;
+  --text-muted: #B8A9C9;
+  --glass-bg: rgba(45, 27, 78, 0.6);
+  --glass-border: rgba(255, 107, 53, 0.2);
+  --success: #4CAF50;
+  --warning: #FFB74D;
+}
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-cream);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.header h1 {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, var(--accent-orange), #FF8F65);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+.header p { color: var(--text-muted); font-size: 1rem; }
+.screens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 375px);
+  gap: 30px;
+  justify-content: center;
+  max-width: 1600px;
+}
+.phone-frame {
+  width: 375px;
+  height: 812px;
+  background: var(--bg-primary);
+  border-radius: 40px;
+  border: 3px solid var(--glass-border);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 30px rgba(255,107,53,0.05);
+}
+.phone-frame::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 150px; height: 30px;
+  background: #000;
+  border-radius: 0 0 15px 15px;
+  z-index: 10;
+}
+.screen { padding: 50px 20px 20px; height: 100%; overflow-y: auto; }
+.screen-label {
+  text-align: center;
+  margin-top: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Splash Screen */
+.splash { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.splash .logo {
+  width: 120px; height: 120px;
+  background: linear-gradient(135deg, var(--accent-orange), #FF8F65);
+  border-radius: 30px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem; font-weight: 700; color: white;
+  animation: pulse 2s infinite;
+  margin-bottom: 24px;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,53,0.4); }
+  50% { box-shadow: 0 0 0 20px rgba(255,107,53,0); }
+}
+.splash h2 { font-size: 1.8rem; margin-bottom: 8px; }
+.splash p { color: var(--text-muted); }
+
+/* Glass Card */
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  backdrop-filter: blur(10px);
+}
+
+/* Wallet Card */
+.wallet-card {
+  background: linear-gradient(135deg, var(--accent-orange), #FF8F65, #E55A2B);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.wallet-card::after {
+  content: '';
+  position: absolute;
+  top: -50%; right: -50%;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+}
+.wallet-card .label { font-size: 0.8rem; opacity: 0.8; }
+.wallet-card .amount { font-family: 'Space Grotesk'; font-size: 2.2rem; font-weight: 700; margin: 8px 0; }
+.wallet-card .sub { font-size: 0.75rem; opacity: 0.7; }
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-orange), #E55A2B);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-family: 'Space Grotesk';
+  font-weight: 600;
+  font-size: 1rem;
+  width: 100%;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.btn-outline {
+  background: transparent;
+  color: var(--accent-orange);
+  border: 1.5px solid var(--accent-orange);
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-family: 'Space Grotesk';
+  font-weight: 500;
+  width: 100%;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* Status badges */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+.badge-pending { background: rgba(255,183,77,0.2); color: var(--warning); }
+.badge-active { background: rgba(76,175,80,0.2); color: var(--success); }
+.badge-escrow { background: rgba(255,107,53,0.2); color: var(--accent-orange); }
+
+/* Transaction item */
+.tx-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.tx-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+}
+.tx-info { flex: 1; }
+.tx-info .name { font-weight: 500; font-size: 0.9rem; }
+.tx-info .date { font-size: 0.75rem; color: var(--text-muted); }
+.tx-amount { font-family: 'Space Grotesk'; font-weight: 600; }
+.tx-amount.credit { color: var(--success); }
+.tx-amount.debit { color: var(--accent-orange); }
+
+/* Nav bar */
+.nav-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(26,15,46,0.95);
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0 20px;
+  backdrop-filter: blur(10px);
+}
+.nav-item { text-align: center; font-size: 0.65rem; color: var(--text-muted); }
+.nav-item.active { color: var(--accent-orange); }
+.nav-item .icon { font-size: 1.3rem; margin-bottom: 2px; }
+
+/* Input */
+.input-field {
+  width: 100%;
+  background: rgba(45,27,78,0.8);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: var(--text-cream);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  outline: none;
+}
+.input-field::placeholder { color: var(--text-muted); }
+
+/* OTP */
+.otp-container { display: flex; gap: 10px; justify-content: center; margin: 24px 0; }
+.otp-box {
+  width: 50px; height: 56px;
+  background: var(--glass-bg);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk';
+  font-size: 1.5rem; font-weight: 700;
+}
+.otp-box.filled { border-color: var(--accent-orange); }
+
+/* Quick actions */
+.quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.quick-action {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 16px 8px;
+  text-align: center;
+}
+.quick-action .icon { font-size: 1.5rem; margin-bottom: 6px; }
+.quick-action .label { font-size: 0.7rem; color: var(--text-muted); }
+
+/* Section title */
+.section-title {
+  font-family: 'Space Grotesk';
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.section-title .see-all { font-size: 0.75rem; color: var(--accent-orange); font-family: 'Inter'; }
+
+/* Onboarding */
+.onboarding-dots { display: flex; gap: 8px; justify-content: center; margin: 20px 0; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+.dot.active { width: 24px; border-radius: 4px; background: var(--accent-orange); }
+
+/* Role cards */
+.role-card {
+  background: var(--glass-bg);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: border-color 0.3s;
+}
+.role-card:hover { border-color: var(--accent-orange); }
+.role-icon { font-size: 2rem; }
+.role-info h3 { font-size: 1rem; margin-bottom: 4px; }
+.role-info p { font-size: 0.75rem; color: var(--text-muted); }
+
+/* Admin stats */
+.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 14px;
+}
+.stat-card .value { font-family: 'Space Grotesk'; font-size: 1.4rem; font-weight: 700; }
+.stat-card .label { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>OCALM</h1>
+  <p>Plateforme d'escrow sécurisé - Apercu des écrans</p>
+</div>
+
+<div class="screens-grid">
+
+  <!-- 1. Splash Screen -->
+  <div>
+    <div class="phone-frame">
+      <div class="screen splash">
+        <div class="logo">O</div>
+        <h2>OCALM</h2>
+        <p>Transactions sécurisées</p>
+      </div>
+    </div>
+    <p class="screen-label">Splash Screen</p>
+  </div>
+
+  <!-- 2. Login / OTP -->
+  <div>
+    <div class="phone-frame">
+      <div class="screen" style="display:flex;flex-direction:column;justify-content:center;">
+        <h2 style="margin-bottom:8px;">Connexion</h2>
+        <p style="color:var(--text-muted);margin-bottom:24px;font-size:0.85rem;">Entrez votre numéro pour recevoir un code OTP</p>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <div style="background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:14px 12px;color:var(--text-cream);font-size:0.9rem;">+225</div>
+          <input class="input-field" style="margin:0;flex:1;" placeholder="07 XX XX XX XX">
+        </div>
+        <button class="btn-primary">Recevoir le code OTP</button>
+        <div style="margin-top:32px;">
+          <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin-bottom:16px;">Entrez le code recu</p>
+          <div class="otp-container">
+            <div class="otp-box filled">4</div>
+            <div class="otp-box filled">7</div>
+            <div class="otp-box">_</div>
+            <div class="otp-box">_</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="screen-label">Login - OTP</p>
+  </div>
+
+  <!-- 3. Role Selection -->
+  <div>
+    <div class="phone-frame">
+      <div class="screen" style="padding-top:80px;">
+        <h2 style="margin-bottom:8px;">Bienvenue !</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:24px;">Choisissez votre profil</p>
+        <div class="role-card">
+          <div class="role-icon">🛒</div>
+          <div class="role-info">
+            <h3>Acheteur</h3>
+            <p>Achetez en toute sécurité avec l'escrow</p>
+          </div>
+        </div>
+        <div class="role-card" style="border-color:var(--accent-orange);">
+          <div class="role-icon">🏪</div>
+          <div class="role-info">
+            <h3>Vendeur</h3>
+            <p>Vendez et recevez vos paiements garantis</p>
+          </div>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">🚚</div>
+          <div class="role-info">
+            <h3>Livreur</h3>
+            <p>Livrez et confirmez les remises</p>
+          </div>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">🛡️</div>
+          <div class="role-info">
+            <h3>Admin</h3>
+            <p>Gérez la plateforme et les litiges</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="screen-label">Sélection du rôle</p>
+  </div>
+
+  <!-- 4. Dashboard Acheteur -->
+  <div>
+    <div class="phone-frame">
+      <div class="screen" style="padding-bottom:80px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div>
+            <p style="color:var(--text-muted);font-size:0.8rem;">Bonjour,</p>
+            <h3>Kouassi 👋</h3>
+          </div>
+          <div style="width:36px;height:36px;background:var(--glass-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;">🔔</div>
+        </div>
+        <div class="wallet-card">
+          <div class="label">Solde disponible</div>
+          <div class="amount">125 000 F</div>
+          <div class="sub">Wave Wallet connecté</div>
+        </div>
+        <div class="quick-actions">
+          <div class="quick-action">
+            <div class="icon">💸</div>
+            <div class="label">Nouvelle transaction</div>
+          </div>
+          <div class="quick-action">
+            <div class="icon">📷</div>
+            <div class="label">Scanner QR</div>
+          </div>
+          <div class="quick-action">
+            <div class="icon">📊</div>
+            <div class="label">Historique</div>
+          </div>
+        </div>
+        <div class="section-title">
+          <span>Transactions récentes</span>
+          <span class="see-all">Voir tout →</span>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(76,175,80,0.15);">📱</div>
+          <div class="tx-info">
+            <div class="name">iPhone 14 Pro</div>
+            <div class="date">Aujourd'hui, 14:30 <span class="badge badge-active">Livré</span></div>
+          </div>
+          <div class="tx-amount debit">-350 000 F</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(255,107,53,0.15);">👟</div>
+          <div class="tx-info">
+            <div class="name">Nike Air Max</div>
+            <div class="date">Hier <span class="badge badge-escrow">En escrow</span></div>
+          </div>
+          <div class="tx-amount debit">-45 000 F</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(255,183,77,0.15);">💻</div>
+          <div class="tx-info">
+            <div class="name">MacBook Air M2</div>
+            <div class="date">3 juin <span class="badge badge-pending">En attente</span></div>
+          </div>
+          <div class="tx-amount debit">-650 000 F</div>
+        </div>
+        <div class="nav-bar">
+          <div class="nav-item active"><div class="icon">🏠</div>Accueil</div>
+          <div class="nav-item"><div class="icon">💼</div>Transactions</div>
+          <div class="nav-item"><div class="icon">📷</div>Scanner</div>
+          <div class="nav-item"><div class="icon">👤</div>Profil</div>
+        </div>
+      </div>
+    </div>
+    <p class="screen-label">Dashboard Acheteur</p>
+  </div>
+
+  <!-- 5. Nouvelle Transaction -->
+  <div>
+    <div class="phone-frame">
+      <div class="screen" style="padding-top:60px;">
+        <h2 style="font-size:1.3rem;margin-bottom:4px;">Nouvelle Transaction</h2>
+        <p style="color:var(--text-muted);font-size:0.8rem;margin-bottom:20px;">Créez une transaction sécurisée</p>
+        <input class="input-field" placeholder="Nom de l'article" value="iPhone 15 Pro Max">
+        <input class="input-field" placeholder="Montant (FCFA)" value="750 000">
+        <input class="input-field" placeholder="Téléphone vendeur" value="+225 07 89 45 12">
+        <input class="input-field" placeholder="Description (optionnel)" value="256Go, Bleu Titane, neuf sous blister">
+        <div class="glass-card" style="margin-top:8px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.85rem;">
+            <span style="color:var(--text-muted);">Montant article</span>
+            <span>750 000 F</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-top:8px;">
+            <span style="color:var(--text-muted);">Frais OCALM (1%)</span>
+            <span style="color:var(--accent-orange);">7 500 F</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:1rem;margin-top:12px;padding-top:12px;border-top:1px solid var(--glass-border);font-weight:600;">
+            <span>Total</span>
+            <span>757 500 F</span>
+          </div>
+        </div>
+        <button class="btn-primary">Payer avec Wave 🌊</button>
+      </div>
+    </div>
+    <p class="screen-label">Nouvelle Transaction</p>
+  </div>
+
+  <!-- 6. Dashboard Vendeur -->
+  <div>
+    <div class="phone-frame">
+      <div class="screen" style="padding-bottom:80px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div>
+            <p style="color:var(--text-muted);font-size:0.8rem;">Espace Vendeur</p>
+            <h3>Boutique Aya 🏪</h3>
+          </div>
+          <div style="width:36px;height:36px;background:var(--glass-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;">⚙️</div>
+        </div>
+        <div class="wallet-card" style="background:linear-gradient(135deg,#2D1B4E,#4A2D6E);">
+          <div class="label">Revenus du mois</div>
+          <div class="amount">1 250 000 F</div>
+          <div class="sub">+23% vs mois dernier</div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="value" style="color:var(--success);">12</div>
+            <div class="label">Ventes complétées</div>
+          </div>
+          <div class="stat-card">
+            <div class="value" style="color:var(--accent-orange);">3</div>
+            <div class="label">En cours</div>
+          </div>
+        </div>
+        <div class="section-title">
+          <span>Commandes</span>
+          <span class="see-all">Filtrer →</span>
+        </div>
+        <div class="glass-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:500;font-size:0.9rem;">Nike Air Max 90</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);">Acheteur: Kouamé D.</div>
+            </div>
+            <span class="badge badge-escrow">En escrow</span>
+          </div>
+          <div style="margin-top:8px;font-family:'Space Grotesk';font-weight:600;">45 000 F</div>
+        </div>
+        <div class="glass-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:500;font-size:0.9rem;">Samsung Galaxy S24</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);">Acheteur: Traoré A.</div>
+            </div>
+            <span class="badge badge-pending">Livraison</span>
+          </div>
+          <div style="margin-top:8px;font-family:'Space Grotesk';font-weight:600;">420 000 F</div>
+        </div>
+        <div class="nav-bar">
+          <div class="nav-item active"><div class="icon">🏠</div>Accueil</div>
+          <div class="nav-item"><div class="icon">📦</div>Commandes</div>
+          <div class="nav-item"><div class="icon">📊</div>Stats</div>
+          <div class="nav-item"><div class="icon">👤</div>Profil</div>
+        </div>
+      </div>
+    </div>
+    <p class="screen-label">Dashboard Vendeur</p>
+  </div>
+
+  <!-- 7. Admin Dashboard -->
+  <div>
+    <div class="phone-frame">
+      <div class="screen" style="padding-bottom:80px;">
+        <div style="margin-bottom:16px;">
+          <p style="color:var(--text-muted);font-size:0.8rem;">Administration</p>
+          <h3>Dashboard Admin 🛡️</h3>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="value">1 847</div>
+            <div class="label">Utilisateurs</div>
+          </div>
+          <div class="stat-card">
+            <div class="value" style="color:var(--accent-orange);">342</div>
+            <div class="label">Transactions/jour</div>
+          </div>
+          <div class="stat-card">
+            <div class="value" style="color:var(--success);">98.2%</div>
+            <div class="label">Taux succès</div>
+          </div>
+          <div class="stat-card">
+            <div class="value" style="color:var(--warning);">7</div>
+            <div class="label">Litiges ouverts</div>
+          </div>
+        </div>
+        <div class="section-title"><span>Revenus plateforme</span></div>
+        <div class="glass-card">
+          <div style="font-family:'Space Grotesk';font-size:1.6rem;font-weight:700;color:var(--accent-orange);">4 250 000 F</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Frais collectés ce mois (1%)</div>
+          <div style="margin-top:12px;height:40px;display:flex;align-items:end;gap:3px;">
+            <div style="width:100%;height:60%;background:var(--accent-orange);border-radius:3px;opacity:0.5;"></div>
+            <div style="width:100%;height:75%;background:var(--accent-orange);border-radius:3px;opacity:0.6;"></div>
+            <div style="width:100%;height:45%;background:var(--accent-orange);border-radius:3px;opacity:0.5;"></div>
+            <div style="width:100%;height:85%;background:var(--accent-orange);border-radius:3px;opacity:0.7;"></div>
+            <div style="width:100%;height:65%;background:var(--accent-orange);border-radius:3px;opacity:0.6;"></div>
+            <div style="width:100%;height:90%;background:var(--accent-orange);border-radius:3px;opacity:0.8;"></div>
+            <div style="width:100%;height:100%;background:var(--accent-orange);border-radius:3px;"></div>
+          </div>
+        </div>
+        <div class="section-title" style="margin-top:16px;"><span>Litiges récents</span></div>
+        <div class="glass-card">
+          <div style="display:flex;justify-content:space-between;">
+            <div style="font-size:0.85rem;">Kouamé vs Traoré</div>
+            <span class="badge badge-pending">En cours</span>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Article non conforme - 185 000 F</div>
+        </div>
+        <div class="nav-bar">
+          <div class="nav-item active"><div class="icon">📊</div>Dashboard</div>
+          <div class="nav-item"><div class="icon">👥</div>Users</div>
+          <div class="nav-item"><div class="icon">⚖️</div>Litiges</div>
+          <div class="nav-item"><div class="icon">⚙️</div>Config</div>
+        </div>
+      </div>
+    </div>
+    <p class="screen-label">Dashboard Admin</p>
+  </div>
+
+</div>
+
+<div style="margin-top:40px;text-align:center;color:var(--text-muted);font-size:0.8rem;padding:20px;">
+  <p>OCALM v1.0 MVP — Design System Afro-Futuriste</p>
+  <p style="margin-top:4px;">Stack: Flutter + NestJS Microservices + Wave CI</p>
+</div>
+
+</body>
+</html>
