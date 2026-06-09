@@ -1,12 +1,13 @@
-# OCALM Backend - Render Unified Deployment
-# Ce Dockerfile lance tous les microservices + PostgreSQL + Redis + Nginx
-# dans un seul container (monorepo) pour le MVP
+# OCALM Backend - Render Deployment (External PostgreSQL)
+# Utilise la base PostgreSQL externe de Render + Redis en mémoire
 
-FROM node:20-alpine AS builder
+FROM node:20-alpine
+
+RUN apk add --no-cache redis nginx supervisor curl
 
 WORKDIR /app
 
-# Copy all services from backend/
+# Copy all services
 COPY backend/services/auth-service ./services/auth-service
 COPY backend/services/wallet-service ./services/wallet-service
 COPY backend/services/escrow-service ./services/escrow-service
@@ -21,26 +22,16 @@ RUN for dir in services/*/; do \
     cd "$dir" && npm install && cd /app; \
   done
 
-# Production image
-FROM node:20-alpine
-
-RUN apk add --no-cache postgresql redis nginx supervisor curl
-
-WORKDIR /app
-
-# Copy installed node_modules and source
-COPY --from=builder /app/services ./services
-COPY --from=builder /app/gateway ./gateway
-COPY --from=builder /app/database ./database
-
-# Supervisor config for process management
-COPY backend/railway/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Supervisor config
+COPY backend/railway/supervisord-render.conf /etc/supervisor/conf.d/supervisord.conf
 COPY backend/railway/nginx.conf /etc/nginx/nginx.conf
-COPY backend/railway/entrypoint.sh /entrypoint.sh
+COPY backend/railway/entrypoint-render.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Init database script
-COPY backend/database/init.sql /docker-entrypoint-initdb.d/
+# Environment
+ENV DATABASE_URL=postgresql://ocalm_db_user:fr1w8xy6CxgilY1p73YgCnibb2u97r9I@dpg-d8jndtegvqtc73eitbr0-a/ocalm_db
+ENV NODE_ENV=production
+ENV PORT=3000
 
 EXPOSE 3000
 
