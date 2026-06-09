@@ -17,9 +17,9 @@ COPY backend/services/notification-service ./services/notification-service
 COPY backend/gateway ./gateway
 COPY backend/database ./database
 
-# Install dependencies for each service
+# Install dependencies for each service + uuid fix
 RUN for dir in services/*/; do \
-    cd "$dir" && npm install && cd /app; \
+    cd "$dir" && npm install && npm install uuid @types/uuid --save && cd /app; \
   done
 
 # Supervisor config
