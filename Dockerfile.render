@@ -1,0 +1,48 @@
+# OCALM Backend - Render Unified Deployment
+# Ce Dockerfile lance tous les microservices + PostgreSQL + Redis + Nginx
+# dans un seul container (monorepo) pour le MVP
+
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy all services from backend/
+COPY backend/services/auth-service ./services/auth-service
+COPY backend/services/wallet-service ./services/wallet-service
+COPY backend/services/escrow-service ./services/escrow-service
+COPY backend/services/delivery-service ./services/delivery-service
+COPY backend/services/dispute-service ./services/dispute-service
+COPY backend/services/notification-service ./services/notification-service
+COPY backend/gateway ./gateway
+COPY backend/database ./database
+
+# Install dependencies for each service
+RUN for dir in services/*/; do \
+    cd "$dir" && npm install && cd /app; \
+  done
+
+# Production image
+FROM node:20-alpine
+
+RUN apk add --no-cache postgresql redis nginx supervisor curl
+
+WORKDIR /app
+
+# Copy installed node_modules and source
+COPY --from=builder /app/services ./services
+COPY --from=builder /app/gateway ./gateway
+COPY --from=builder /app/database ./database
+
+# Supervisor config for process management
+COPY backend/railway/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY backend/railway/nginx.conf /etc/nginx/nginx.conf
+COPY backend/railway/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Init database script
+COPY backend/database/init.sql /docker-entrypoint-initdb.d/
+
+EXPOSE 3000
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
