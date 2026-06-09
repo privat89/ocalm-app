@@ -1,5 +1,5 @@
 // OCALM PWA - Service Worker
-const CACHE_NAME = 'ocalm-v1';
+const CACHE_NAME = 'ocalm-v2';
 const STATIC_ASSETS = [
   '/ocalm-app/web-app/',
   '/ocalm-app/web-app/index.html',
@@ -35,23 +35,44 @@ self.addEventListener('activate', (event) => {
 // Fetch - network first, cache fallback
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  
-  // API calls - network only
-  if (request.url.includes('ocalm-backend')) {
-    event.respondWith(fetch(request));
+  const url = new URL(request.url);
+
+  // API calls - network only, never cache
+  if (request.url.includes('ocalm-backend') || request.mode === 'cors') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Only cache successful same-origin responses
+          return response;
+        })
+        .catch((err) => {
+          console.error('[SW] API fetch failed:', err);
+          return new Response(JSON.stringify({ error: 'Network error' }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        })
+    );
     return;
   }
-  
-  // Static assets - cache first
+
+  // Static assets - cache first, network fallback
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
-      return fetch(request).then((response) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, response.clone());
+      return fetch(request)
+        .then((response) => {
+          // Cache successful GET responses
+          if (response.ok && request.method === 'GET') {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
           return response;
+        })
+        .catch((err) => {
+          console.error('[SW] Static fetch failed:', err);
+          throw err;
         });
-      });
     })
   );
 });
