@@ -1,11 +1,11 @@
 # OCALM Backend - Render Deployment (External PostgreSQL)
 # Utilise la base PostgreSQL externe de Render + Redis en mémoire
+# Build pré-effectué dans l'image (pas de build au démarrage)
 
-FROM node:20-alpine
+FROM node:20-alpine AS builder
 
-RUN apk add --no-cache redis nginx supervisor curl
-
-WORKDIR /app
+WORKDIR /build
+RUN apk add --no-cache python3 make g++
 
 # Copy all services
 COPY backend/services/auth-service ./services/auth-service
@@ -17,16 +17,33 @@ COPY backend/services/notification-service ./services/notification-service
 COPY backend/gateway ./gateway
 COPY backend/database ./database
 
-# Install dependencies for each service + uuid fix
+# Install + build each service
 RUN for dir in services/*/; do \
-    cd "$dir" && npm install && npm install uuid @types/uuid --save && cd /app; \
+    cd "$dir" && \
+    npm install && \
+    npm install uuid @types/uuid --save && \
+    npm run build && \
+    cd /build; \
   done
+
+# Production image
+FROM node:20-alpine
+
+RUN apk add --no-cache redis nginx supervisor curl
+
+WORKDIR /app
+
+# Copy pre-built dist + node_modules
+COPY --from=builder /build/services ./services
+COPY --from=builder /build/gateway ./gateway
+COPY --from=builder /build/database ./database
 
 # Supervisor config
 COPY backend/railway/supervisord-render.conf /etc/supervisor/conf.d/supervisord.conf
 COPY backend/railway/nginx.conf /etc/nginx/nginx.conf
-COPY backend/railway/entrypoint-render.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+
+# Init database script
+COPY backend/database/init.sql /docker-entrypoint-initdb.d/
 
 # Environment
 ENV DATABASE_URL=postgresql://ocalm_db_user:fr1w8xy6CxgilY1p73YgCnibb2u97r9I@dpg-d8jndtegvqtc73eitbr0-a/ocalm_db
@@ -35,5 +52,4 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-ENTRYPOINT ["/entrypoint.sh"]
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
