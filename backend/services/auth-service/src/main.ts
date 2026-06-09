@@ -12,9 +12,16 @@ async function bootstrap() {
   }));
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:8080'],
-    methods: 'GET,POST,PUT,DELETE',
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:8080',
+      'https://localhost',
+      'https://privat89.github.io',
+      /^https:\/\/.*\.github\.io$/,
+    ],
+    methods: 'GET,POST,PUT,DELETE,PATCH,OPTIONS',
     credentials: true,
+    allowedHeaders: 'Content-Type, Authorization, X-Requested-With',
   });
 
   const port = process.env.PORT || 3001;

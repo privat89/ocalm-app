@@ -8,22 +8,19 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- ============================================
 -- TABLE: users
 -- ============================================
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     phone VARCHAR(20) NOT NULL UNIQUE,
     phone_verified BOOLEAN DEFAULT FALSE,
     name VARCHAR(100),
-    role VARCHAR(20) DEFAULT 'acheteur', -- acheteur, vendeur, livreur
+    role VARCHAR(20) DEFAULT 'acheteur',
     avatar_url TEXT,
-    -- Livreur specific
     cni_photo_url TEXT,
     selfie_url TEXT,
     livreur_verified BOOLEAN DEFAULT FALSE,
     caution_paid BOOLEAN DEFAULT FALSE,
-    -- Stats
     rating DECIMAL(3,2) DEFAULT 0.00,
     total_transactions INTEGER DEFAULT 0,
-    -- Meta
     is_active BOOLEAN DEFAULT TRUE,
     is_blocked BOOLEAN DEFAULT FALSE,
     blocked_reason TEXT,
@@ -32,36 +29,27 @@ CREATE TABLE users (
 );
 
 -- ============================================
--- TABLE: transactions_escrow (TABLE CENTRALE)
+-- TABLE: transactions_escrow
 -- ============================================
-CREATE TABLE transactions_escrow (
+CREATE TABLE IF NOT EXISTS transactions_escrow (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     reference VARCHAR(50) NOT NULL UNIQUE,
-    -- Participants
     acheteur_id UUID NOT NULL REFERENCES users(id),
     vendeur_id UUID NOT NULL REFERENCES users(id),
     livreur_id UUID REFERENCES users(id),
-    -- Montants
     montant_article INTEGER NOT NULL,
     frais_ocalm INTEGER NOT NULL,
     frais_livraison INTEGER DEFAULT 0,
-    montant_total INTEGER NOT NULL, -- article + frais + livraison
-    -- Article
+    montant_total INTEGER NOT NULL,
     description TEXT NOT NULL,
-    -- Statut
     statut VARCHAR(30) DEFAULT 'en_attente_paiement',
-    -- Valeurs: en_attente_paiement, fonds_bloques, en_livraison, livre_valide, litige, rembourse, annule
-    -- Sécurité
     code_secret_acheteur VARCHAR(6),
     qr_code_depart UUID DEFAULT uuid_generate_v4(),
     qr_code_arrivee UUID DEFAULT uuid_generate_v4(),
-    -- Livraison
     avec_livraison BOOLEAN DEFAULT FALSE,
     pickup_address TEXT,
     delivery_address TEXT,
-    -- Litige
     en_litige BOOLEAN DEFAULT FALSE,
-    -- Timestamps
     paid_at TIMESTAMP,
     picked_up_at TIMESTAMP,
     delivered_at TIMESTAMP,
@@ -75,23 +63,18 @@ CREATE TABLE transactions_escrow (
 -- ============================================
 -- TABLE: payments
 -- ============================================
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     transaction_id UUID NOT NULL REFERENCES transactions_escrow(id),
-    -- Payment details
-    type VARCHAR(30) NOT NULL, -- escrow_deposit, seller_payout, livreur_payout, refund
+    type VARCHAR(30) NOT NULL,
     amount INTEGER NOT NULL,
-    operator VARCHAR(20) NOT NULL, -- wave, orange_money, mtn_momo, moov
+    operator VARCHAR(20) NOT NULL,
     phone VARCHAR(20) NOT NULL,
-    -- Status
-    status VARCHAR(20) DEFAULT 'pending', -- pending, processing, completed, failed
-    -- Provider reference
+    status VARCHAR(20) DEFAULT 'pending',
     provider_ref VARCHAR(100),
     provider_response JSONB,
-    -- Security
     idempotency_key VARCHAR(100) UNIQUE,
     webhook_verified BOOLEAN DEFAULT FALSE,
-    -- Timestamps
     completed_at TIMESTAMP,
     failed_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT NOW()
@@ -100,11 +83,10 @@ CREATE TABLE payments (
 -- ============================================
 -- TABLE: deliveries
 -- ============================================
-CREATE TABLE deliveries (
+CREATE TABLE IF NOT EXISTS deliveries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     transaction_id UUID NOT NULL REFERENCES transactions_escrow(id),
     livreur_id UUID NOT NULL REFERENCES users(id),
-    -- Route
     pickup_address TEXT NOT NULL,
     pickup_lat DECIMAL(10, 7),
     pickup_lng DECIMAL(10, 7),
@@ -112,51 +94,41 @@ CREATE TABLE deliveries (
     delivery_lat DECIMAL(10, 7),
     delivery_lng DECIMAL(10, 7),
     distance_km DECIMAL(5, 2),
-    -- Status
-    status VARCHAR(20) DEFAULT 'assigned', -- assigned, picked_up, in_transit, delivered
-    -- QR Scans
+    status VARCHAR(20) DEFAULT 'assigned',
     departure_scanned_at TIMESTAMP,
     arrival_scanned_at TIMESTAMP,
-    -- Validation method
-    validation_method VARCHAR(10), -- qr, otp
-    -- Gain
+    validation_method VARCHAR(10),
     gain_livreur INTEGER NOT NULL,
-    -- Meta
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
 -- ============================================
--- TABLE: disputes (litiges)
+-- TABLE: disputes
 -- ============================================
-CREATE TABLE disputes (
+CREATE TABLE IF NOT EXISTS disputes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     transaction_id UUID NOT NULL REFERENCES transactions_escrow(id),
     opened_by UUID NOT NULL REFERENCES users(id),
-    -- Details
     reason TEXT NOT NULL,
     description TEXT,
-    -- Status
-    status VARCHAR(20) DEFAULT 'ouvert', -- ouvert, en_mediation, resolu_acheteur, resolu_vendeur, arbitrage
-    -- Resolution
+    status VARCHAR(20) DEFAULT 'ouvert',
     resolution TEXT,
     resolved_by UUID REFERENCES users(id),
     resolved_at TIMESTAMP,
-    -- Evidence
-    evidence_urls TEXT[], -- Array of MinIO URLs
-    -- Meta
+    evidence_urls TEXT[],
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
 -- ============================================
--- TABLE: dispute_messages (chat médiation)
+-- TABLE: dispute_messages
 -- ============================================
-CREATE TABLE dispute_messages (
+CREATE TABLE IF NOT EXISTS dispute_messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     dispute_id UUID NOT NULL REFERENCES disputes(id),
     sender_id UUID NOT NULL REFERENCES users(id),
-    sender_role VARCHAR(20) NOT NULL, -- acheteur, vendeur, livreur, admin
+    sender_role VARCHAR(20) NOT NULL,
     message TEXT NOT NULL,
     attachment_url TEXT,
     created_at TIMESTAMP DEFAULT NOW()
@@ -165,7 +137,7 @@ CREATE TABLE dispute_messages (
 -- ============================================
 -- TABLE: notifications
 -- ============================================
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id),
     type VARCHAR(30) NOT NULL,
@@ -173,27 +145,27 @@ CREATE TABLE notifications (
     body TEXT NOT NULL,
     data JSONB,
     read BOOLEAN DEFAULT FALSE,
-    sent_via VARCHAR(20), -- push, sms, both
+    sent_via VARCHAR(20),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- ============================================
 -- TABLE: otp_codes
 -- ============================================
-CREATE TABLE otp_codes (
+CREATE TABLE IF NOT EXISTS otp_codes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     phone VARCHAR(20) NOT NULL,
     code VARCHAR(6) NOT NULL,
-    purpose VARCHAR(20) DEFAULT 'login', -- login, transaction_validate
+    purpose VARCHAR(20) DEFAULT 'login',
     used BOOLEAN DEFAULT FALSE,
     expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- ============================================
--- TABLE: audit_logs (immuable)
+-- TABLE: audit_logs
 -- ============================================
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id),
     action VARCHAR(50) NOT NULL,
@@ -208,7 +180,7 @@ CREATE TABLE audit_logs (
 -- ============================================
 -- TABLE: fcm_tokens
 -- ============================================
-CREATE TABLE fcm_tokens (
+CREATE TABLE IF NOT EXISTS fcm_tokens (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id),
     token TEXT NOT NULL,
@@ -220,21 +192,21 @@ CREATE TABLE fcm_tokens (
 -- ============================================
 -- INDEXES
 -- ============================================
-CREATE INDEX idx_transactions_acheteur ON transactions_escrow(acheteur_id);
-CREATE INDEX idx_transactions_vendeur ON transactions_escrow(vendeur_id);
-CREATE INDEX idx_transactions_livreur ON transactions_escrow(livreur_id);
-CREATE INDEX idx_transactions_statut ON transactions_escrow(statut);
-CREATE INDEX idx_transactions_reference ON transactions_escrow(reference);
-CREATE INDEX idx_payments_transaction ON payments(transaction_id);
-CREATE INDEX idx_payments_idempotency ON payments(idempotency_key);
-CREATE INDEX idx_deliveries_livreur ON deliveries(livreur_id);
-CREATE INDEX idx_disputes_transaction ON disputes(transaction_id);
-CREATE INDEX idx_notifications_user ON notifications(user_id, read);
-CREATE INDEX idx_otp_phone ON otp_codes(phone, used, expires_at);
-CREATE INDEX idx_audit_entity ON audit_logs(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_acheteur ON transactions_escrow(acheteur_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_vendeur ON transactions_escrow(vendeur_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_livreur ON transactions_escrow(livreur_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_statut ON transactions_escrow(statut);
+CREATE INDEX IF NOT EXISTS idx_transactions_reference ON transactions_escrow(reference);
+CREATE INDEX IF NOT EXISTS idx_payments_transaction ON payments(transaction_id);
+CREATE INDEX IF NOT EXISTS idx_payments_idempotency ON payments(idempotency_key);
+CREATE INDEX IF NOT EXISTS idx_deliveries_livreur ON deliveries(livreur_id);
+CREATE INDEX IF NOT EXISTS idx_disputes_transaction ON disputes(transaction_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, read);
+CREATE INDEX IF NOT EXISTS idx_otp_phone ON otp_codes(phone, used, expires_at);
+CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_logs(entity_type, entity_id);
 
 -- ============================================
--- TARIFICATION FUNCTION
+-- FUNCTIONS
 -- ============================================
 CREATE OR REPLACE FUNCTION calculate_ocalm_fees(montant INTEGER)
 RETURNS INTEGER AS $$
@@ -248,9 +220,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
--- ============================================
--- TRIGGER: auto-update updated_at
--- ============================================
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -259,7 +228,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- ============================================
+-- TRIGGERS (dropped first to prevent dup errors)
+-- ============================================
+DROP TRIGGER IF EXISTS users_updated_at ON users;
 CREATE TRIGGER users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS transactions_updated_at ON transactions_escrow;
 CREATE TRIGGER transactions_updated_at BEFORE UPDATE ON transactions_escrow FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS deliveries_updated_at ON deliveries;
 CREATE TRIGGER deliveries_updated_at BEFORE UPDATE ON deliveries FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS disputes_updated_at ON disputes;
 CREATE TRIGGER disputes_updated_at BEFORE UPDATE ON disputes FOR EACH ROW EXECUTE FUNCTION update_updated_at();

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0066FF">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+<title>OCALM - Escrow Sécurisé</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Splash -->
+<div class="splash" id="splash">
+  <div class="logo">🔷</div>
+  <h1>OCALM</h1>
+  <p>Transactions sécurisées</p>
+</div>
+
+<!-- Toast -->
+<!-- Dynamically created by JS -->
+
+<!-- LOGIN -->
+<div class="page" id="page-login">
+  <div class="header"><h1>Connexion</h1></div>
+  <div class="card" style="margin-top:40px;">
+    <p style="color:var(--text-muted);margin-bottom:20px;">Entrez votre numéro pour recevoir un code OTP</p>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <div style="padding:14px 12px;background:var(--bg);border-radius:12px;font-weight:500;">+225</div>
+      <input type="tel" class="input" id="login-phone" placeholder="07 XX XX XX XX" style="flex:1;margin:0;" maxlength="10">
+    </div>
+    <button class="btn btn-primary" id="btn-login">Recevoir le code OTP</button>
+  </div>
+</div>
+
+<!-- OTP -->
+<div class="page" id="page-otp">
+  <div class="header"><h1>Vérification</h1></div>
+  <div class="card" style="margin-top:40px;">
+    <p style="color:var(--text-muted);margin-bottom:20px;text-align:center;">Entrez le code envoyé par SMS</p>
+    <div class="otp-grid">
+      <input type="tel" class="otp-box" maxlength="1" inputmode="numeric">
+      <input type="tel" class="otp-box" maxlength="1" inputmode="numeric">
+      <input type="tel" class="otp-box" maxlength="1" inputmode="numeric">
+      <input type="tel" class="otp-box" maxlength="1" inputmode="numeric">
+    </div>
+    <button class="btn btn-primary" id="btn-verify">Vérifier le code</button>
+    <p style="text-align:center;color:var(--text-muted);margin-top:16px;font-size:13px;">Vous n'avez pas reçu ? <a href="#" style="color:var(--primary);">Renvoyer le code</a></p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="header">
+    <div>
+      <p style="font-size:12px;color:var(--text-muted);">Bonjour,</p>
+      <h1 id="dash-name">Utilisateur 👋</h1>
+    </div>
+    <button class="icon-btn" id="btn-notif" aria-label="Notifications">🔔</button>
+  </div>
+  
+  <!-- Wallet Card -->
+  <div class="card card-gradient">
+    <div class="label">Solde disponible</div>
+    <div class="amount" id="wallet-amount">0 F</div>
+    <div class="sub">Wave Wallet connecté</div>
+  </div>
+  
+  <!-- Quick Actions -->
+  <div class="actions-grid">
+    <div class="action-btn" id="btn-new-tx">
+      <div class="icon">💸</div>
+      <div class="label">Transac.</div>
+    </div>
+    <div class="action-btn" id="btn-scan">
+      <div class="icon">📷</div>
+      <div class="label">Scanner</div>
+    </div>
+    <div class="action-btn" id="btn-history">
+      <div class="icon">📊</div>
+      <div class="label">Historique</div>
+    </div>
+  </div>
+  
+  <!-- Transactions -->
+  <div class="section-title">
+    <span>Transactions récentes</span>
+    <a href="#" id="see-all-tx">Voir tout →</a>
+  </div>
+  <div class="tx-list" id="tx-list">
+    <p style="text-align:center;color:var(--text-muted);padding:40px 20px;">Chargement...</p>
+  </div>
+</div>
+
+<!-- NEW TRANSACTION -->
+<div class="page" id="page-new-tx">
+  <div class="header">
+    <button class="icon-btn" id="back-tx" aria-label="Retour">←</button>
+    <h1>Nouvelle Transaction</h1>
+    <div style="width:40px;"></div>
+  </div>
+  
+  <div class="card">
+    <input type="text" class="input" id="tx-article" placeholder="Nom de l'article">
+    <input type="number" class="input" id="tx-montant" placeholder="Montant (FCFA)">
+    
+    <!-- Calcul -->
+    <div style="background:var(--bg);padding:16px;border-radius:12px;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;font-size:14px;">
+        <span style="color:var(--text-muted);">Montant article</span>
+        <span id="calc-article">0 F</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;margin-top:8px;">
+        <span style="color:var(--text-muted);">Frais OCALM (1%)</span>
+        <span id="calc-frais" style="color:var(--primary);">0 F</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <span style="font-weight:600;">Total</span>
+        <span id="calc-total" style="font-weight:700;">0 F</span>
+      </div>
+    </div>
+    
+    <input type="tel" class="input" id="tx-vendeur" placeholder="Téléphone vendeur (+225)">
+    <textarea class="input" id="tx-desc" placeholder="Description (optionnel)" rows="3" style="resize:none;"></textarea>
+    <button class="btn btn-primary" id="confirm-tx">Payer avec Wave 🌊</button>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="page" id="page-profile">
+  <div class="header"><h1>Profil</h1></div>
+  <div class="card" style="text-align:center;padding:32px;">
+    <div style="width:80px;height:80px;background:linear-gradient(135deg, var(--primary), var(--primary-light));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 16px;">👤</div>
+    <h2 id="profile-name">Utilisateur</h2>
+    <p id="profile-phone" style="color:var(--text-muted);margin-top:4px;">+225 ...</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-bottom:16px;">Paramètres</h3>
+    <div class="tx-item" style="padding:12px 0;border-radius:0;">
+      <div class="tx-icon" style="background:rgba(0,102,255,0.08);">🔔</div>
+      <div class="tx-info"><div class="name">Notifications</div></div>
+      <div>></div>
+    </div>
+    <div class="tx-item" style="padding:12px 0;border-radius:0;">
+      <div class="tx-icon" style="background:rgba(0,102,255,0.08);">🔒</div>
+      <div class="tx-info"><div class="name">Sécurité</div></div>
+      <div>></div>
+    </div>
+    <div class="tx-item" style="padding:12px 0;border-radius:0;">
+      <div class="tx-icon" style="background:rgba(0,102,255,0.08);">❓</div>
+      <div class="tx-info"><div class="name">Aide & Support</div></div>
+      <div>></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <button class="btn" id="btn-logout" style="background:var(--bg);color:var(--danger);">Se déconnecter</button>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="nav-home">
+    <div class="icon">🏠</div>
+    <span>Accueil</span>
+  </div>
+  <div class="nav-item" id="nav-transactions">
+    <div class="icon">💼</div>
+    <span>Transac.</span>
+  </div>
+  <div class="nav-item" id="nav-profile">
+    <div class="icon">👤</div>
+    <span>Profil</span>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
