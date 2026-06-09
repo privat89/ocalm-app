@@ -8,20 +8,20 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
-  --bg-primary: #1A0F2E;
-  --bg-secondary: #2D1B4E;
-  --accent-orange: #FF6B35;
-  --text-cream: #F5E6D3;
-  --text-muted: #B8A9C9;
-  --glass-bg: rgba(45, 27, 78, 0.6);
-  --glass-border: rgba(255, 107, 53, 0.2);
-  --success: #4CAF50;
-  --warning: #FFB74D;
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F0F4F8;
+  --accent-blue: #0066FF;
+  --text-dark: #1A1A2E;
+  --text-muted: #6B7280;
+  --glass-bg: rgba(240, 244, 248, 0.8);
+  --glass-border: rgba(0, 102, 255, 0.2);
+  --success: #00D68F;
+  --warning: #FFB800;
 }
 body {
   font-family: 'Inter', sans-serif;
   background: var(--bg-primary);
-  color: var(--text-cream);
+  color: var(--text-dark);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -35,7 +35,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
 }
 .header h1 {
   font-size: 2.5rem;
-  background: linear-gradient(135deg, var(--accent-orange), #FF8F65);
+  background: linear-gradient(135deg, var(--accent-blue), #4D94FF);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 8px;
@@ -56,7 +56,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
   border: 3px solid var(--glass-border);
   overflow: hidden;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 30px rgba(255,107,53,0.05);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.1), inset 0 0 30px rgba(0,102,255,0.05);
 }
 .phone-frame::before {
   content: '';
@@ -82,7 +82,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
 .splash { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .splash .logo {
   width: 120px; height: 120px;
-  background: linear-gradient(135deg, var(--accent-orange), #FF8F65);
+  background: linear-gradient(135deg, var(--accent-blue), #4D94FF);
   border-radius: 30px;
   display: flex; align-items: center; justify-content: center;
   font-family: 'Space Grotesk', sans-serif;
@@ -91,8 +91,8 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
   margin-bottom: 24px;
 }
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,53,0.4); }
-  50% { box-shadow: 0 0 0 20px rgba(255,107,53,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,102,255,0.4); }
+  50% { box-shadow: 0 0 0 20px rgba(0,102,255,0); }
 }
 .splash h2 { font-size: 1.8rem; margin-bottom: 8px; }
 .splash p { color: var(--text-muted); }
@@ -109,7 +109,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
 
 /* Wallet Card */
 .wallet-card {
-  background: linear-gradient(135deg, var(--accent-orange), #FF8F65, #E55A2B);
+  background: linear-gradient(135deg, var(--accent-blue), #4D94FF, #0047CC);
   border-radius: 20px;
   padding: 24px;
   margin-bottom: 20px;
@@ -130,7 +130,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
 
 /* Buttons */
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-orange), #E55A2B);
+  background: linear-gradient(135deg, var(--accent-blue), #0047CC);
   color: white;
   border: none;
   border-radius: 12px;
@@ -144,8 +144,8 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
 }
 .btn-outline {
   background: transparent;
-  color: var(--accent-orange);
-  border: 1.5px solid var(--accent-orange);
+  color: var(--accent-blue);
+  border: 1.5px solid var(--accent-blue);
   border-radius: 12px;
   padding: 12px 24px;
   font-family: 'Space Grotesk';
@@ -165,7 +165,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
 }
 .badge-pending { background: rgba(255,183,77,0.2); color: var(--warning); }
 .badge-active { background: rgba(76,175,80,0.2); color: var(--success); }
-.badge-escrow { background: rgba(255,107,53,0.2); color: var(--accent-orange); }
+.badge-escrow { background: rgba(0,102,255,0.1); color: var(--accent-blue); }
 
 /* Transaction item */
 .tx-item {
@@ -186,13 +186,13 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
 .tx-info .date { font-size: 0.75rem; color: var(--text-muted); }
 .tx-amount { font-family: 'Space Grotesk'; font-weight: 600; }
 .tx-amount.credit { color: var(--success); }
-.tx-amount.debit { color: var(--accent-orange); }
+.tx-amount.debit { color: var(--accent-blue); }
 
 /* Nav bar */
 .nav-bar {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  background: rgba(26,15,46,0.95);
+  background: rgba(255,255,255,0.95);
   border-top: 1px solid var(--glass-border);
   display: flex;
   justify-content: space-around;
@@ -200,17 +200,17 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
   backdrop-filter: blur(10px);
 }
 .nav-item { text-align: center; font-size: 0.65rem; color: var(--text-muted); }
-.nav-item.active { color: var(--accent-orange); }
+.nav-item.active { color: var(--accent-blue); }
 .nav-item .icon { font-size: 1.3rem; margin-bottom: 2px; }
 
 /* Input */
 .input-field {
   width: 100%;
-  background: rgba(45,27,78,0.8);
+  background: rgba(240, 244, 248, 0.8);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   padding: 14px 16px;
-  color: var(--text-cream);
+  color: var(--text-dark);
   font-size: 0.9rem;
   margin-bottom: 12px;
   outline: none;
@@ -228,7 +228,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
   font-family: 'Space Grotesk';
   font-size: 1.5rem; font-weight: 700;
 }
-.otp-box.filled { border-color: var(--accent-orange); }
+.otp-box.filled { border-color: var(--accent-blue); }
 
 /* Quick actions */
 .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
@@ -252,12 +252,12 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
   justify-content: space-between;
   align-items: center;
 }
-.section-title .see-all { font-size: 0.75rem; color: var(--accent-orange); font-family: 'Inter'; }
+.section-title .see-all { font-size: 0.75rem; color: var(--accent-blue); font-family: 'Inter'; }
 
 /* Onboarding */
 .onboarding-dots { display: flex; gap: 8px; justify-content: center; margin: 20px 0; }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
-.dot.active { width: 24px; border-radius: 4px; background: var(--accent-orange); }
+.dot.active { width: 24px; border-radius: 4px; background: var(--accent-blue); }
 
 /* Role cards */
 .role-card {
@@ -271,7 +271,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
   gap: 16px;
   transition: border-color 0.3s;
 }
-.role-card:hover { border-color: var(--accent-orange); }
+.role-card:hover { border-color: var(--accent-blue); }
 .role-icon { font-size: 2rem; }
 .role-info h3 { font-size: 1rem; margin-bottom: 4px; }
 .role-info p { font-size: 0.75rem; color: var(--text-muted); }
@@ -347,7 +347,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
             <p>Achetez en toute sécurité avec l'escrow</p>
           </div>
         </div>
-        <div class="role-card" style="border-color:var(--accent-orange);">
+        <div class="role-card" style="border-color:var(--accent-blue);">
           <div class="role-icon">🏪</div>
           <div class="role-info">
             <h3>Vendeur</h3>
@@ -459,7 +459,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
           </div>
           <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-top:8px;">
             <span style="color:var(--text-muted);">Frais OCALM (1%)</span>
-            <span style="color:var(--accent-orange);">7 500 F</span>
+            <span style="color:var(--accent-blue);">7 500 F</span>
           </div>
           <div style="display:flex;justify-content:space-between;font-size:1rem;margin-top:12px;padding-top:12px;border-top:1px solid var(--glass-border);font-weight:600;">
             <span>Total</span>
@@ -483,7 +483,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
           </div>
           <div style="width:36px;height:36px;background:var(--glass-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;">⚙️</div>
         </div>
-        <div class="wallet-card" style="background:linear-gradient(135deg,#2D1B4E,#4A2D6E);">
+        <div class="wallet-card" style="background:linear-gradient(135deg,#0066FF,#4D94FF);">
           <div class="label">Revenus du mois</div>
           <div class="amount">1 250 000 F</div>
           <div class="sub">+23% vs mois dernier</div>
@@ -494,7 +494,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
             <div class="label">Ventes complétées</div>
           </div>
           <div class="stat-card">
-            <div class="value" style="color:var(--accent-orange);">3</div>
+            <div class="value" style="color:var(--accent-blue);">3</div>
             <div class="label">En cours</div>
           </div>
         </div>
@@ -547,7 +547,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
             <div class="label">Utilisateurs</div>
           </div>
           <div class="stat-card">
-            <div class="value" style="color:var(--accent-orange);">342</div>
+            <div class="value" style="color:var(--accent-blue);">342</div>
             <div class="label">Transactions/jour</div>
           </div>
           <div class="stat-card">
@@ -561,16 +561,16 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
         </div>
         <div class="section-title"><span>Revenus plateforme</span></div>
         <div class="glass-card">
-          <div style="font-family:'Space Grotesk';font-size:1.6rem;font-weight:700;color:var(--accent-orange);">4 250 000 F</div>
+          <div style="font-family:'Space Grotesk';font-size:1.6rem;font-weight:700;color:var(--accent-blue);">4 250 000 F</div>
           <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Frais collectés ce mois (1%)</div>
           <div style="margin-top:12px;height:40px;display:flex;align-items:end;gap:3px;">
-            <div style="width:100%;height:60%;background:var(--accent-orange);border-radius:3px;opacity:0.5;"></div>
-            <div style="width:100%;height:75%;background:var(--accent-orange);border-radius:3px;opacity:0.6;"></div>
-            <div style="width:100%;height:45%;background:var(--accent-orange);border-radius:3px;opacity:0.5;"></div>
-            <div style="width:100%;height:85%;background:var(--accent-orange);border-radius:3px;opacity:0.7;"></div>
-            <div style="width:100%;height:65%;background:var(--accent-orange);border-radius:3px;opacity:0.6;"></div>
-            <div style="width:100%;height:90%;background:var(--accent-orange);border-radius:3px;opacity:0.8;"></div>
-            <div style="width:100%;height:100%;background:var(--accent-orange);border-radius:3px;"></div>
+            <div style="width:100%;height:60%;background:var(--accent-blue);border-radius:3px;opacity:0.5;"></div>
+            <div style="width:100%;height:75%;background:var(--accent-blue);border-radius:3px;opacity:0.6;"></div>
+            <div style="width:100%;height:45%;background:var(--accent-blue);border-radius:3px;opacity:0.5;"></div>
+            <div style="width:100%;height:85%;background:var(--accent-blue);border-radius:3px;opacity:0.7;"></div>
+            <div style="width:100%;height:65%;background:var(--accent-blue);border-radius:3px;opacity:0.6;"></div>
+            <div style="width:100%;height:90%;background:var(--accent-blue);border-radius:3px;opacity:0.8;"></div>
+            <div style="width:100%;height:100%;background:var(--accent-blue);border-radius:3px;"></div>
           </div>
         </div>
         <div class="section-title" style="margin-top:16px;"><span>Litiges récents</span></div>
@@ -595,7 +595,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
 </div>
 
 <div style="margin-top:40px;text-align:center;color:var(--text-muted);font-size:0.8rem;padding:20px;">
-  <p>OCALM v1.0 MVP — Design System Afro-Futuriste</p>
+  <p>OCALM v1.0 MVP — Design System Bleu & Blanc</p>
   <p style="margin-top:4px;">Stack: Flutter + NestJS Microservices + Wave CI</p>
 </div>
 

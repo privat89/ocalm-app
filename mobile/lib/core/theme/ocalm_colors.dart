@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 
-/// Couleurs officielles OCALM — Direction Afro-Futuriste
+/// Couleurs officielles OCALM — Direction Bleu & Blanc
 /// "Fais tes affaires... Au Calme."
 class OcalmColors {
   OcalmColors._();
 
   // ─── Couleurs primaires ──────────────────────────────────────────
-  static const Color background = Color(0xFF1A0F2E);       // Deep space indigo-purple
-  static const Color primary = Color(0xFFFF6B35);          // Vibrant orange - CTAs, accents
-  static const Color textPrimary = Color(0xFFF5E6D3);      // Warm cream - texte principal
-  static const Color surface = Color(0xFF241845);          // Carte/surface élevée
+  static const Color background = Color(0xFFFFFFFF);       // Blanc pur - fond principal
+  static const Color primary = Color(0xFF0066FF);          // Bleu électrique - CTAs, accents
+  static const Color textPrimary = Color(0xFF1A1A2E);      // Bleu nuit - texte principal
+  static const Color surface = Color(0xFFF0F4F8);          // Gris bleu très clair - cartes
 
   // ─── Couleurs secondaires ────────────────────────────────────────
-  static const Color primaryLight = Color(0xFFFF8F5E);     // Orange clair (hover)
-  static const Color primaryDark = Color(0xFFE55A2B);      // Orange foncé (pressed)
-  static const Color surfaceLight = Color(0xFF2E2055);     // Surface élevée niveau 2
-  static const Color surfaceBorder = Color(0xFF3D2A6E);    // Bordure lumineuse des cartes
+  static const Color primaryLight = Color(0xFF4D94FF);     // Bleu clair (hover)
+  static const Color primaryDark = Color(0xFF0047CC);      // Bleu foncé (pressed)
+  static const Color surfaceLight = Color(0xFFE8EEF4);     // Surface élevée niveau 2
+  static const Color surfaceBorder = Color(0xFFD0D8E0);    // Bordure subtile des cartes
 
   // ─── Glass-morphism ──────────────────────────────────────────────
-  static const Color glassBackground = Color(0x0FFFFFFF);  // 6% blanc
-  static const Color glassBorder = Color(0x33FFFFFF);      // 20% blanc
-  static const Color glassHighlight = Color(0x1AFF6B35);   // 10% orange glow
+  static const Color glassBackground = Color(0x0F000000);  // 6% noir
+  static const Color glassBorder = Color(0x33000000);      // 20% noir
+  static const Color glassHighlight = Color(0x1A0066FF);   // 10% bleu glow
 
   // ─── Couleurs de statut ──────────────────────────────────────────
   static const Color statusPending = Color(0xFFFFB800);    // En attente - Ambre
@@ -31,17 +31,17 @@ class OcalmColors {
   static const Color success = Color(0xFF00D68F);          // Succès global
 
   // ─── Couleurs de fond ────────────────────────────────────────────
-  static const Color backgroundDarker = Color(0xFF120A22); // Fond plus profond (modales)
-  static const Color backgroundGradientEnd = Color(0xFF0D0719); // Fin de gradient
-  static const Color divider = Color(0xFF3D2A6E);          // Séparateurs subtils
+  static const Color backgroundDarker = Color(0xFFF5F7FA); // Fond plus profond (modales)
+  static const Color backgroundGradientEnd = Color(0xFFE8EEF4); // Fin de gradient
+  static const Color divider = Color(0xFFD0D8E0);          // Séparateurs subtils
 
   // ─── Couleurs texte ──────────────────────────────────────────────
-  static const Color textSecondary = Color(0xB3F5E6D3);    // 70% cream
-  static const Color textHint = Color(0x66F5E6D3);         // 40% cream
-  static const Color textOnPrimary = Color(0xFFFFFFFF);    // Texte sur bouton orange
-  static const Color textOnSuccess = Color(0xFF1A0F2E);    // Texte sur vert
+  static const Color textSecondary = Color(0xB31A1A2E);    // 70% bleu nuit
+  static const Color textHint = Color(0x661A1A2E);         // 40% bleu nuit
+  static const Color textOnPrimary = Color(0xFFFFFFFF);    // Texte sur bouton bleu
+  static const Color textOnSuccess = Color(0xFFFFFFFF);    // Texte sur vert
 
   // ─── Motifs & Déco ──────────────────────────────────────────────
-  static const Color patternOverlay = Color(0x1AF5E6D3);   // 10% cream pour motifs adinkra
-  static const Color glowOrange = Color(0x40FF6B35);       // Glow effect boutons
+  static const Color patternOverlay = Color(0x1A0066FF);   // 10% bleu pour motifs
+  static const Color glowOrange = Color(0x400066FF);       // Glow effect boutons bleu
 }
