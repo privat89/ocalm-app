@@ -4,22 +4,33 @@ const API_BASE = 'https://ocalm-backend-s3hx.onrender.com';
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
   const config = {
+    method: 'GET',
+    mode: 'cors',
     headers: { 'Content-Type': 'application/json' },
     ...options,
   };
   if (config.body && typeof config.body === 'object') config.body = JSON.stringify(config.body);
-  
+
+  let res;
   try {
-    const res = await fetch(url, config);
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ message: 'Erreur serveur' }));
-      throw new Error(err.message || `HTTP ${res.status}`);
-    }
-    return await res.json();
-  } catch (e) {
-    showToast(e.message, 'error');
-    throw e;
+    res = await fetch(url, config);
+  } catch (networkErr) {
+    const msg = 'Serveur injoignable. Vérifiez votre connexion ou réessayez.';
+    showToast(msg, 'error');
+    console.error('[API Network Error]', networkErr);
+    throw new Error(msg);
   }
+
+  if (!res.ok) {
+    let errMsg = `Erreur serveur (${res.status})`;
+    try {
+      const errData = await res.json();
+      errMsg = errData.message || errData.error || errMsg;
+    } catch (_) { /* ignore */ }
+    showToast(errMsg, 'error');
+    throw new Error(errMsg);
+  }
+  return await res.json();
 }
 
 async function sendOTP(phone) {
