@@ -267,11 +267,28 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('nav-profile')?.addEventListener('click', () => navigateTo('page-profile'));
   document.getElementById('btn-logout')?.addEventListener('click', logout);
   
-  // Register service worker
+  // Register / cleanup service worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(() => console.log('PWA ready'))
-      .catch(e => console.log('SW error', e));
+    // Force-unregister any existing service worker to bypass cache issues
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(reg => {
+        console.log('[SW] Unregistering old service worker');
+        reg.unregister();
+      });
+    });
+    // Clear all caches
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        names.forEach(name => {
+          console.log('[SW] Deleting cache:', name);
+          caches.delete(name);
+        });
+      });
+    }
+    // OPTIONNEL: réactiver quand tout est stable
+    // navigator.serviceWorker.register('./service-worker.js')
+    //   .then(() => console.log('PWA ready'))
+    //   .catch(e => console.log('SW error', e));
   }
 });
 
