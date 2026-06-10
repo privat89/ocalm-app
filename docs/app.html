@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0066FF">
+<title>OCALM - Application Fonctionnelle</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --primary:#0066FF; --primary-light:#3385FF; --bg:#F5F7FA; --surface:#FFFFFF; --text:#1A1A2E; --text-muted:#8B8B9E; --border:#E8E8F0; --danger:#FF3B30; --success:#34C759; }
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+  body { background:var(--bg); color:var(--text); min-height:100vh; }
+  .header { background:var(--surface); padding:16px 20px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between; }
+  .header h1 { font-size:18px; font-weight:700; color:var(--primary); }
+  .container { padding:20px; max-width:480px; margin:0 auto; }
+  .card { background:var(--surface); border-radius:16px; padding:20px; margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+  .input { width:100%; padding:14px 16px; border:1.5px solid var(--border); border-radius:12px; font-size:15px; outline:none; transition:border-color .2s; margin-bottom:12px; }
+  .input:focus { border-color:var(--primary); }
+  .btn { width:100%; padding:14px; border:none; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer; transition:opacity .2s; }
+  .btn-primary { background:var(--primary); color:#fff; }
+  .btn-secondary { background:var(--bg); color:var(--primary); border:1.5px solid var(--primary); }
+  .btn:active { opacity:.85; }
+  .result { margin-top:16px; padding:12px; border-radius:8px; font-size:13px; word-break:break-all; }
+  .result.success { background:rgba(52,199,89,0.1); color:var(--success); }
+  .result.error { background:rgba(255,59,48,0.1); color:var(--danger); }
+  .result.info { background:rgba(0,102,255,0.08); color:var(--primary); }
+  .hidden { display:none !important; }
+  .page { display:none; }
+  .page.active { display:block; }
+  .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); display:flex; justify-content:space-around; padding:8px 0; z-index:100; }
+  .nav-item { display:flex; flex-direction:column; align-items:center; gap:4px; padding:4px 16px; cursor:pointer; color:var(--text-muted); font-size:11px; border:none; background:none; }
+  .nav-item.active { color:var(--primary); }
+  .nav-item span { font-size:20px; }
+  .balance { font-size:28px; font-weight:700; color:var(--primary); text-align:center; margin:16px 0; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+  .grid-item { background:var(--bg); border-radius:12px; padding:16px; text-align:center; cursor:pointer; transition:transform .2s; }
+  .grid-item:active { transform:scale(0.98); }
+  .grid-item .icon { font-size:28px; margin-bottom:8px; }
+  .grid-item .label { font-size:13px; font-weight:500; color:var(--text); }
+  .transaction { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); }
+  .transaction:last-child { border-bottom:none; }
+  .tx-info .tx-title { font-weight:500; font-size:14px; }
+  .tx-info .tx-date { font-size:12px; color:var(--text-muted); }
+  .tx-amount { font-weight:600; font-size:14px; }
+  .tx-amount.positive { color:var(--success); }
+  .tx-amount.negative { color:var(--danger); }
+  .status-badge { display:inline-block; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+  .status-en_attente { background:#FFF3E0; color:#E65100; }
+  .status-en_cours { background:#E3F2FD; color:#1565C0; }
+  .status-termine { background:#E8F5E9; color:#2E7D32; }
+  .status-litige { background:#FFEBEE; color:#C62828; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🔷 OCALM</h1>
+  <div id="header-status" style="font-size:12px;color:var(--text-muted);">Chargement...</div>
+</div>
+
+<div class="container">
+
+  <!-- PAGE: Login -->
+  <div id="page-login" class="page active">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:16px;">🔷</div>
+      <h2 style="margin-bottom:8px;">OCALM</h2>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px;">Transactions sécurisées entre particuliers</p>
+      
+      <h3 style="margin-bottom:16px;font-size:16px;">Connexion</h3>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <div style="padding:14px 12px;background:var(--bg);border-radius:12px;font-weight:500;">+225</div>
+        <input type="tel" class="input" id="login-phone" placeholder="07 XX XX XX XX" style="flex:1;margin:0;" maxlength="10" value="0789782921">
+      </div>
+      <button class="btn btn-primary" onclick="sendOtp()">Recevoir le code OTP</button>
+      <div id="login-result" class="result" style="display:none;"></div>
+      
+      <div id="otp-section" style="display:none;margin-top:16px;">
+        <input type="text" class="input" id="login-otp" placeholder="Code OTP à 6 chiffres" maxlength="6">
+        <button class="btn btn-primary" onclick="verifyOtp()">Vérifier le code</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: Dashboard -->
+  <div id="page-dashboard" class="page">
+    <div class="card">
+      <p style="text-align:center;color:var(--text-muted);font-size:14px;">Solde disponible</p>
+      <div class="balance" id="user-balance">0 F</div>
+      <div style="text-align:center;">
+        <span class="status-badge status-en_cours">Wave Wallet connecté</span>
+      </div>
+    </div>
+    
+    <div class="grid">
+      <div class="grid-item" onclick="navigateTo('page-new-transaction')">
+        <div class="icon">💸</div>
+        <div class="label">Nouvelle transaction</div>
+      </div>
+      <div class="grid-item" onclick="navigateTo('page-scan')">
+        <div class="icon">📷</div>
+        <div class="label">Scanner QR</div>
+      </div>
+      <div class="grid-item" onclick="navigateTo('page-transactions')">
+        <div class="icon">📊</div>
+        <div class="label">Historique</div>
+      </div>
+      <div class="grid-item" onclick="navigateTo('page-profile')">
+        <div class="icon">👤</div>
+        <div class="label">Mon profil</div>
+      </div>
+    </div>
+    
+    <div class="card" style="margin-top:16px;">
+      <h3 style="margin-bottom:12px;">Transactions récentes</h3>
+      <div id="recent-transactions"><div style="text-align:center;color:var(--text-muted);padding:20px;">Chargement...</div></div>
+    </div>
+  </div>
+
+  <!-- PAGE: New Transaction -->
+  <div id="page-new-transaction" class="page">
+    <div class="card">
+      <h3 style="margin-bottom:16px;">Nouvelle Transaction</h3>
+      <input type="text" class="input" id="tx-phone" placeholder="Numéro du vendeur (+225...)">
+      <input type="number" class="input" id="tx-amount" placeholder="Montant (FCFA)">
+      <textarea class="input" id="tx-desc" placeholder="Description de l'article" rows="3" style="resize:none;"></textarea>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+        <input type="checkbox" id="tx-delivery" style="width:20px;height:20px;">
+        <label for="tx-delivery">Avec livraison</label>
+      </div>
+      <div id="delivery-fields" style="display:none;">
+        <input type="text" class="input" id="tx-pickup" placeholder="Adresse de retrait">
+        <input type="text" class="input" id="tx-delivery-addr" placeholder="Adresse de livraison">
+      </div>
+      <button class="btn btn-primary" onclick="createTransaction()">Créer la transaction</button>
+      <div id="tx-result" class="result" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- PAGE: Transactions -->
+  <div id="page-transactions" class="page">
+    <div class="card">
+      <h3 style="margin-bottom:12px;">Toutes les transactions</h3>
+      <div id="all-transactions"><div style="text-align:center;color:var(--text-muted);padding:20px;">Chargement...</div></div>
+    </div>
+  </div>
+
+  <!-- PAGE: Profile -->
+  <div id="page-profile" class="page">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">👤</div>
+      <h3 id="profile-name">Utilisateur</h3>
+      <p id="profile-phone" style="color:var(--text-muted);">+225 ...</p>
+      <div style="margin-top:16px;">
+        <div style="display:flex;justify-content:space-around;margin-bottom:16px;">
+          <div><div style="font-size:20px;font-weight:700;">0</div><div style="font-size:12px;color:var(--text-muted);">Transactions</div></div>
+          <div><div style="font-size:20px;font-weight:700;">0.0</div><div style="font-size:12px;color:var(--text-muted);">Note</div></div>
+        </div>
+        <button class="btn btn-secondary" onclick="logout()">Déconnexion</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: Scan -->
+  <div id="page-scan" class="page">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:16px;">📷</div>
+      <h3>Scanner un QR Code</h3>
+      <p style="color:var(--text-muted);margin:16px 0;">Cette fonctionnalité nécessite l'accès à la caméra.</p>
+      <button class="btn btn-primary" onclick="alert('Scanner QR - à implémenter avec la caméra')">Activer la caméra</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav" id="bottom-nav" style="display:none;">
+  <button class="nav-item active" onclick="navigateTo('page-dashboard');setNavActive(this);">
+    <span>🏠</span>Accueil
+  </button>
+  <button class="nav-item" onclick="navigateTo('page-transactions');setNavActive(this);">
+    <span>💼</span>Transac.
+  </button>
+  <button class="nav-item" onclick="navigateTo('page-profile');setNavActive(this);">
+    <span>👤</span>Profil
+  </button>
+</div>
+
+<script>
+// ============== CONFIG ==============
+const API_BASE = 'https://ocalm-backend-s3hx.onrender.com';
+let currentUser = null;
+let authToken = localStorage.getItem('ocalm_token');
+
+// ============== NAVIGATION ==============
+function navigateTo(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId)?.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function setNavActive(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ============== API HELPERS ==============
+function showResult(id, text, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'result ' + (type || 'info');
+  el.style.display = 'block';
+}
+
+async function apiCall(endpoint, options = {}) {
+  const url = API_BASE + endpoint;
+  const config = {
+    method: options.method || 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+      ...options.headers
+    }
+  };
+  if (options.body) config.body = JSON.stringify(options.body);
+
+  try {
+    const res = await fetch(url, config);
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, status: res.status, data };
+  } catch (e) {
+    return { ok: false, error: e.message, networkError: true };
+  }
+}
+
+// ============== AUTH ==============
+async function sendOtp() {
+  const phone = '+225' + document.getElementById('login-phone').value.replace(/\s/g, '');
+  showResult('login-result', 'Envoi en cours...', 'info');
+  
+  const res = await apiCall('/auth/send-otp', { method: 'POST', body: { phone } });
+  
+  if (res.ok && res.data?.success) {
+    showResult('login-result', '✅ Code envoyé ! Vérifiez vos SMS.', 'success');
+    document.getElementById('otp-section').style.display = 'block';
+  } else if (res.networkError) {
+    showResult('login-result', '❌ Impossible de joindre le serveur. Vérifiez votre connexion.', 'error');
+  } else {
+    showResult('login-result', '❌ ' + (res.data?.message || `Erreur ${res.status}`), 'error');
+  }
+}
+
+async function verifyOtp() {
+  const phone = '+225' + document.getElementById('login-phone').value.replace(/\s/g, '');
+  const code = document.getElementById('login-otp').value;
+  showResult('login-result', 'Vérification...', 'info');
+  
+  const res = await apiCall('/auth/verify-otp', { method: 'POST', body: { phone, code } });
+  
+  if (res.ok && res.data?.token) {
+    authToken = res.data.token;
+    localStorage.setItem('ocalm_token', authToken);
+    currentUser = res.data.user;
+    showResult('login-result', '✅ Connecté !', 'success');
+    setTimeout(() => showDashboard(), 1000);
+  } else {
+    showResult('login-result', '❌ ' + (res.data?.message || 'Code invalide'), 'error');
+  }
+}
+
+function logout() {
+  authToken = null;
+  currentUser = null;
+  localStorage.removeItem('ocalm_token');
+  document.getElementById('bottom-nav').style.display = 'none';
+  navigateTo('page-login');
+}
+
+// ============== DASHBOARD ==============
+function showDashboard() {
+  navigateTo('page-dashboard');
+  document.getElementById('bottom-nav').style.display = 'flex';
+  loadTransactions();
+}
+
+async function loadTransactions() {
+  const res = await apiCall('/escrow/my-transactions');
+  const container = document.getElementById('recent-transactions');
+  const allContainer = document.getElementById('all-transactions');
+  
+  if (!res.ok || !res.data?.transactions?.length) {
+    const empty = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Aucune transaction</div>';
+    container.innerHTML = empty;
+    if (allContainer) allContainer.innerHTML = empty;
+    return;
+  }
+  
+  const txs = res.data.transactions;
+  const html = txs.slice(0, 5).map(tx => renderTransaction(tx)).join('');
+  container.innerHTML = html;
+  if (allContainer) allContainer.innerHTML = txs.map(tx => renderTransaction(tx)).join('');
+}
+
+function renderTransaction(tx) {
+  const statusClass = 'status-' + (tx.statut || 'en_attente');
+  const amountClass = tx.montant_total >= 0 ? 'positive' : 'negative';
+  return `
+    <div class="transaction">
+      <div class="tx-info">
+        <div class="tx-title">${tx.description || 'Transaction'}</div>
+        <div class="tx-date">${tx.created_at ? new Date(tx.created_at).toLocaleDateString('fr-FR') : '...'}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="tx-amount ${amountClass}">${tx.montant_total?.toLocaleString() || 0} F</div>
+        <span class="status-badge ${statusClass}">${tx.statut || 'En attente'}</span>
+      </div>
+    </div>
+  `;
+}
+
+// ============== CREATE TRANSACTION ==============
+async function createTransaction() {
+  const body = {
+    vendeurPhone: document.getElementById('tx-phone').value,
+    montant: parseInt(document.getElementById('tx-amount').value),
+    description: document.getElementById('tx-desc').value,
+    avecLivraison: document.getElementById('tx-delivery').checked,
+    pickupAddress: document.getElementById('tx-pickup')?.value,
+    deliveryAddress: document.getElementById('tx-delivery-addr')?.value
+  };
+  
+  showResult('tx-result', 'Création...', 'info');
+  const res = await apiCall('/escrow/create', { method: 'POST', body });
+  
+  if (res.ok) {
+    showResult('tx-result', '✅ Transaction créée !', 'success');
+    setTimeout(() => { navigateTo('page-dashboard'); loadTransactions(); }, 1500);
+  } else {
+    showResult('tx-result', '❌ ' + (res.data?.message || 'Erreur'), 'error');
+  }
+}
+
+// ============== INIT ==============
+document.getElementById('tx-delivery')?.addEventListener('change', (e) => {
+  document.getElementById('delivery-fields').style.display = e.target.checked ? 'block' : 'none';
+});
+
+// Check auth on load
+if (authToken) {
+  showDashboard();
+} else {
+  navigateTo('page-login');
+}
+
+// Update header status
+async function checkBackend() {
+  const res = await apiCall('/health');
+  const el = document.getElementById('header-status');
+  if (res.ok) {
+    el.textContent = '🟢 Backend en ligne';
+    el.style.color = 'var(--success)';
+  } else {
+    el.textContent = '🔴 Backend injoignable';
+    el.style.color = 'var(--danger)';
+  }
+}
+checkBackend();
+</script>
+
+</body>
+</html>
