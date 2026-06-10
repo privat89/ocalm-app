@@ -1,5 +1,5 @@
 // OCALM PWA - Service Worker v3
-// EMERGENCY FIX: API calls must NOT be intercepted
+// SAFE: does NOT intercept API calls
 
 const CACHE_NAME = 'ocalm-v3';
 const STATIC_ASSETS = [
@@ -38,12 +38,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
-  // NEVER intercept API calls - let the browser handle them natively
+  // NEVER intercept API calls
   if (request.url.includes('ocalm-backend')) {
     return;
   }
 
-  // For static assets, try network first, cache fallback
   if (request.method !== 'GET') {
     return;
   }

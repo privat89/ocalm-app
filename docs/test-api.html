@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0066FF">
+<title>OCALM - Test Direct API</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --primary:#0066FF; --primary-light:#3385FF; --bg:#F5F7FA; --surface:#FFFFFF; --text:#1A1A2E; --text-muted:#8B8B9E; --border:#E8E8F0; --danger:#FF3B30; --success:#34C759; }
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+  body { background:var(--bg); color:var(--text); min-height:100vh; }
+  .header { background:var(--surface); padding:16px 20px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:10; }
+  .header h1 { font-size:18px; font-weight:700; color:var(--primary); }
+  .container { padding:20px; max-width:480px; margin:0 auto; }
+  .card { background:var(--surface); border-radius:16px; padding:20px; margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+  .input { width:100%; padding:14px 16px; border:1.5px solid var(--border); border-radius:12px; font-size:15px; outline:none; transition:border-color .2s; margin-bottom:12px; }
+  .input:focus { border-color:var(--primary); }
+  .btn { width:100%; padding:14px; border:none; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer; transition:opacity .2s; }
+  .btn-primary { background:var(--primary); color:#fff; }
+  .btn:active { opacity:.85; }
+  .result { margin-top:16px; padding:12px; border-radius:8px; font-size:13px; word-break:break-all; }
+  .result.success { background:rgba(52,199,89,0.1); color:var(--success); }
+  .result.error { background:rgba(255,59,48,0.1); color:var(--danger); }
+  .result.info { background:rgba(0,102,255,0.08); color:var(--primary); }
+  .status { display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:14px; }
+  .dot { width:8px; height:8px; border-radius:50%; }
+  .dot.ok { background:var(--success); }
+  .dot.ko { background:var(--danger); }
+  .dot.unknown { background:var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="header"><h1>🔷 OCALM - Test Direct API</h1></div>
+
+<div class="container">
+
+  <!-- Status Backend -->
+  <div class="card">
+    <h3 style="margin-bottom:12px;">Statut Backend</h3>
+    <div class="status" id="status-health">
+      <div class="dot unknown"></div>
+      <span>Vérification en cours...</span>
+    </div>
+    <button class="btn btn-primary" onclick="checkHealth()">Vérifier le backend</button>
+    <div id="result-health" class="result" style="display:none;"></div>
+  </div>
+
+  <!-- Test OTP -->
+  <div class="card">
+    <h3 style="margin-bottom:12px;">Test Envoi OTP</h3>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <div style="padding:14px 12px;background:var(--bg);border-radius:12px;font-weight:500;">+225</div>
+      <input type="tel" class="input" id="test-phone" placeholder="07 XX XX XX XX" style="flex:1;margin:0;" maxlength="10" value="0789782921">
+    </div>
+    <button class="btn btn-primary" onclick="testOtp()">Envoyer le code OTP</button>
+    <div id="result-otp" class="result" style="display:none;"></div>
+  </div>
+
+  <!-- Test CORS -->
+  <div class="card">
+    <h3 style="margin-bottom:12px;">Test CORS Direct</h3>
+    <button class="btn btn-primary" onclick="testCors()">Tester CORS (fetch direct)</button>
+    <div id="result-cors" class="result" style="display:none;"></div>
+  </div>
+
+  <!-- Info -->
+  <div class="card" style="background:rgba(0,102,255,0.04);">
+    <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">
+      Cette page est une <strong>page de secours</strong> sans Service Worker, sans cache, et sans PWA. 
+      Elle permet de tester directement si le backend répond et si les problèmes CORS sont résolus.
+      Si ce test fonctionne mais pas la PWA principale, le problème vient du navigateur (cache, SW, extensions).
+    </p>
+  </div>
+
+</div>
+
+<script>
+const API_BASE = 'https://ocalm-backend-s3hx.onrender.com';
+
+function showResult(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'result ' + (type || 'info');
+  el.style.display = 'block';
+}
+
+async function checkHealth() {
+  showResult('result-health', 'Chargement...', 'info');
+  try {
+    const res = await fetch(API_BASE + '/health', { method: 'GET', mode: 'cors' });
+    const text = await res.text();
+    showResult('result-health', 'Status: ' + res.status + ' | Réponse: ' + text, 'success');
+    document.getElementById('status-health').innerHTML = '<div class="dot ok"></div><span>Backend en ligne (' + res.status + ')</span>';
+  } catch (e) {
+    showResult('result-health', 'Erreur: ' + e.message, 'error');
+    document.getElementById('status-health').innerHTML = '<div class="dot ko"></div><span>Backend injoignable</span>';
+  }
+}
+
+async function testOtp() {
+  const phone = '+225' + document.getElementById('test-phone').value.replace(/\s/g, '');
+  showResult('result-otp', 'Envoi en cours vers ' + phone + '...', 'info');
+  try {
+    const res = await fetch(API_BASE + '/auth/send-otp', {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    });
+    const data = await res.json();
+    showResult('result-otp', 'Status: ' + res.status + ' | Réponse: ' + JSON.stringify(data), res.ok ? 'success' : 'error');
+  } catch (e) {
+    showResult('result-otp', 'Erreur réseau: ' + e.message, 'error');
+  }
+}
+
+async function testCors() {
+  showResult('result-cors', 'Test CORS en cours...', 'info');
+  try {
+    const res = await fetch(API_BASE + '/auth/send-otp', {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json', 'Origin': 'https://privat89.github.io' },
+      body: JSON.stringify({ phone: '+22500000000' })
+    });
+    const data = await res.json();
+    showResult('result-cors', 'Status: ' + res.status + ' | CORS: OK | Réponse: ' + JSON.stringify(data), res.ok ? 'success' : 'error');
+  } catch (e) {
+    showResult('result-cors', 'Erreur CORS/Réseau: ' + e.message, 'error');
+  }
+}
+
+// Auto-check on load
+checkHealth();
+</script>
+
+</body>
+</html>

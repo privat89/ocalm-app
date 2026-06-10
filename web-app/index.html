@@ -4,11 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0066FF">
-<link rel="manifest" href="./manifest.json">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<link rel="manifest" href="./manifest.json?v=3">
 <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
 <title>OCALM - Escrow Sécurisé</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=3">
+<script>
+  // EMERGENCY: force-unregister ANY service worker and clear ALL caches
+  (function() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        regs.forEach(function(reg) {
+          console.log('[INDEX] Unregistering SW:', reg.scope);
+          reg.unregister();
+        });
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        names.forEach(function(name) {
+          console.log('[INDEX] Clearing cache:', name);
+          caches.delete(name);
+        });
+      });
+    }
+  })();
+</script>
 </head>
 <body>
 
